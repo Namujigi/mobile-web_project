@@ -1,4 +1,5 @@
-venv/
+django_blog/.venv
+socket_server_python/myenv
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

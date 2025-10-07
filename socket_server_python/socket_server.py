@@ -4,7 +4,7 @@ from datetime import datetime
 
 class SocketServer:
     def __init__(self):
-        self.bufsize = 1024 * 10
+        self.bufsize = 1024
         with open('./response.bin', 'rb') as file:
             self.RESPONSE = file.read()
         
@@ -29,27 +29,42 @@ class SocketServer:
         try:
             while True:
                 clnt_sock, req_addr = self.sock.accept()
-                clnt_sock.settimeout(5)
+                clnt_sock.settimeout(3)
                 print("Request message...\r\n")        
 
-                response = b"""
-                HTTP/1.1 200 OK
-                Content-Type: application/octet-stream
-                Content-Length: 
-                """
+                now_time = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+                with open(f"{self.DIR_PATH}/{now_time}.bin", 'wb') as file:
+                    boundary_str = b""
+                    while True:
+                        try:
+                            req_data = clnt_sock.recv(self.bufsize)
+                            file.write(req_data)
 
+                            if b"Content-Type: " in req_data:
+                                content_type = req_data.split(b"Content-Type: ")[1].split(b';')[0]
+                                if content_type == b"multipart/form-data":
+                                    boundary_str = b"--" + req_data.split(b"boundary=")[1].split(b"\r\n")[0]
 
-                req_data = clnt_sock.recv(self.bufsize)
-                # req_data = req_data.decode('utf-8').split('\r\n')
-                # for ele in req_data:
-                #     if "boundary=" in ele:
-                #         boundary_str = ele.split('boundary=')[1]
-                #         break
-                # with open(f"{self.DIR_PATH}/{datetime.now().strftime('%Y-%m-%d-%H-%M-%S')}.bin", 'wb') as file:
-                #     file.write(req_data)
-                print(req_data)
+                        except socket.timeout:
+                            break
+                
+                with open(f"{self.DIR_PATH}/{now_time}.bin", 'rb') as file:
+                    full_data = file.read()
+
+                if boundary_str != b"":
+                    full_data = full_data.split(boundary_str)
+                    # print(full_data)
+
+                    for ele in full_data:
+                        if b"Content-Disposition: form-data; name=\"image\"" in ele:
+                            filename = ele.split(b"filename=")[1].split(b"\"")[1]
+                            
+                            with open(f"./{filename.decode('utf-8')}", 'wb') as file:
+                                file.write(ele.split(b"\r\n\r\n")[1])
+                    
 
                 clnt_sock.sendall(self.RESPONSE)
+                print("\r\nSent response message...\r\n")
                 clnt_sock.close()
         except KeyboardInterrupt:
             print("\r\nStop the server...")
