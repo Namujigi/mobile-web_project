@@ -8,6 +8,10 @@ https://docs.djangoproject.com/en/5.2/howto/deployment/wsgi/
 """
 
 import os
+import sys
+
+path = '/home/namujigi/django_blog'
+if 
 
 from django.core.wsgi import get_wsgi_application
 
