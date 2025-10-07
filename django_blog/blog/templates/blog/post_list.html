@@ -8,7 +8,10 @@
         </div>
         <h1><a href="">{{ post.title }}</a></h1>
         <p>{{ post.text|linebreaksbr }}</p>
-        <img src="{{ post.image.url }}" class="rounded blog-image-list" alt="{{post.title}}">
+
+        {% if post.image %}
+        <img src="{{post.image.url}}" class="rounded blog-image-list" alt="{{post.title}}">
+        {% endif %}
     </div>
     {% endfor %}
 {% endblock %}
