@@ -3,8 +3,8 @@ import requests
 HOST = 'http://127.0.0.1:8000'
 
 res = requests.post(HOST + '/api-token-auth/', {
-        'username': 'admin',
-        'password': '0000',
+        'username': 'username',
+        'password': 'password',
 })
 
 res.raise_for_status()
@@ -28,4 +28,5 @@ with open('./google-color.png', 'rb') as f:
     res = requests.post(HOST + '/api_root/Post/', data=data, files=file, headers= headers)
 
 print(res)
+
 print(res.json())
